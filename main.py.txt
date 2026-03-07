@@ -1,0 +1,52 @@
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
+import os
+from groq import Groq
+
+app = FastAPI()
+
+# Lên Server mình sẽ giấu API Key của sếp vào đây cho an toàn
+GROQ_API_KEY = os.getenv("GROQ_API_KEY") 
+client = Groq(api_key=GROQ_API_KEY)
+
+MODEL_NAME = "meta-llama/llama-4-maverick-17b-128e-instruct"
+
+class TranslationRequest(BaseModel):
+    text: str
+
+@app.post("/translate")
+def translate_text(request: TranslationRequest):
+    try:
+        text_dau_vao = request.text
+        
+        # BƯỚC 1: DỊCH THÔ
+        chat_1 = client.chat.completions.create(
+            messages=[
+                {"role": "system", "content": "Bạn là biên dịch viên. Dịch đoạn văn sau sang tiếng Việt sát nghĩa gốc nhất."},
+                {"role": "user", "content": text_dau_vao}
+            ],
+            model=MODEL_NAME,
+        )
+        ban_dich_tho = chat_1.choices[0].message.content
+        
+        # BƯỚC 2: TRAU CHUỐT VĂN PHONG LIGHT NOVEL
+        prompt_refine = f"""
+        Viết lại bản dịch thô sau thành văn phong Light Novel/Tiên hiệp mượt mà.
+        Giữ nguyên ý nghĩa, không cắt bớt chi tiết. Chỉ trả về bản dịch hoàn chỉnh, không giải thích gì thêm.
+        
+        Bản gốc: {text_dau_vao}
+        Bản dịch thô: {ban_dich_tho}
+        """
+        
+        chat_2 = client.chat.completions.create(
+            messages=[
+                {"role": "system", "content": "Bạn là tác giả tiểu thuyết mạng nổi tiếng."},
+                {"role": "user", "content": prompt_refine}
+            ],
+            model=MODEL_NAME,
+        )
+        
+        return {"translated_text": chat_2.choices[0].message.content}
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
