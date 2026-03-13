@@ -1,3 +1,4 @@
+
 from fastapi import FastAPI
 from pydantic import BaseModel
 import os
@@ -9,7 +10,10 @@ app = FastAPI()
 GROQ_API_KEY = os.getenv("GROQ_API_KEY") 
 client = Groq(api_key=GROQ_API_KEY)
 
-MODEL_NAME = "meta-llama/llama-4-maverick-17b-128e-instruct"
+# ==========================================
+# ĐÃ SỬA Ở ĐÂY: Thay model cũ bị xóa bằng Llama 3 70B
+# ==========================================
+MODEL_NAME = "llama3-70b-8192"
 
 class TranslationRequest(BaseModel):
     text: str
