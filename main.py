@@ -13,7 +13,7 @@ client = Groq(api_key=GROQ_API_KEY)
 # ==========================================
 # ĐÃ SỬA Ở ĐÂY: Thay model cũ bị xóa bằng Llama 3 70B
 # ==========================================
-MODEL_NAME = "llama3-70b-8192"
+MODEL_NAME = "llama-3.3-70b-versatile"
 
 class TranslationRequest(BaseModel):
     text: str
@@ -66,3 +66,4 @@ def translate_text(request: TranslationRequest):
             return {"translated_text": "⚠️ LỖI: Bạn đang bấm dịch quá nhanh hoặc đoạn văn quá dài gây kẹt API! Vui lòng đợi khoảng 1 phút rồi bấm lại nhé."}
         else:
             return {"translated_text": f"⚠️ LỖI HỆ THỐNG: {error_msg}"}
+
